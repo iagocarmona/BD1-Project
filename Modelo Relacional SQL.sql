@@ -1,11 +1,37 @@
+
+-- -------------------------------------------------------------------------
+-- LINK DO REPOSITÓRIO -> https://github.com/iagocarmona/BD1-Projeto
+-- -------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS FORNECEDOR_FORNECE_PRODUTO;
+DROP TABLE IF EXISTS FUNCIONARIO_GERENCIA_PEDIDO;
+DROP TABLE IF EXISTS EQUIPAMENTO_TEM_JOGO;
+DROP TABLE IF EXISTS CLIENTE_UTILIZA_EQUIPAMENTO;
+DROP TABLE IF EXISTS FUNCIONARIO_ARRUMA_EQUIPAMENTO;
+DROP TABLE IF EXISTS FUNCIONARIO_ATENDE_CLIENTE;
+DROP TABLE IF EXISTS PRODUTO_ACESSORIOS;
+DROP TABLE IF EXISTS PRODUTO_PECASCOMPUTADOR;
+DROP TABLE IF EXISTS PRODUTO;
+DROP TABLE IF EXISTS NOTA_FISCAL;
+DROP TABLE IF EXISTS PEDIDO;
 DROP TABLE IF EXISTS FORNECEDOR;
-DROP TABLE IF EXISTS REPARO;
 DROP TABLE IF EXISTS JOGO;
 DROP TABLE IF EXISTS EQUIP_CONSOLE;
 DROP TABLE IF EXISTS EQUIP_COMPUTADOR;
 DROP TABLE IF EXISTS EQUIPAMENTO;
 DROP TABLE IF EXISTS FUNCIONARIO;
+DROP TABLE IF EXISTS REPARO;
 DROP TABLE IF EXISTS CLIENTE;
+DROP TABLE IF EXISTS ENDERECO;
+
+CREATE TABLE ENDERECO(
+	estado CHAR(2),
+    rua VARCHAR(100),
+    bairro VARCHAR(100),
+    numero INTEGER,
+    cidade VARCHAR(100),
+    PRIMARY KEY (rua, bairro, numero)
+);
 
 CREATE TABLE CLIENTE(
 	cpf CHAR(11),
@@ -13,7 +39,22 @@ CREATE TABLE CLIENTE(
     telefone CHAR(13),
     email VARCHAR(200),
     nome VARCHAR(100),
-    PRIMARY KEY (cpf)
+    ruaEndereco VARCHAR(100),
+	bairroEndereco VARCHAR(100),
+    numeroEndereco INTEGER,
+    PRIMARY KEY (cpf),
+    FOREIGN KEY( ruaEndereco, bairroEndereco, numeroEndereco)
+		REFERENCES ENDERECO(rua, bairro, numero) ON DELETE CASCADE
+);
+
+CREATE TABLE REPARO(
+	codigo INTEGER,
+    preco DECIMAL(10,2),
+    tipoEquipamento VARCHAR(20),
+    descricao VARCHAR(200),
+    cpfCliente CHAR(11),
+    PRIMARY KEY (codigo),
+    FOREIGN KEY (cpfCliente) REFERENCES CLIENTE(cpf)
 );
 
 CREATE TABLE FUNCIONARIO(
@@ -22,51 +63,147 @@ CREATE TABLE FUNCIONARIO(
     salario DECIMAL(10,2),
 	cargo VARCHAR(20),
     nome VARCHAR(100),
-    PRIMARY KEY(cpf)
+    codigoReparo INTEGER,
+    ruaEndereco VARCHAR(100),
+    bairroEndereco VARCHAR(100),
+    numeroEndereco INTEGER,
+    PRIMARY KEY(cpf),
+    FOREIGN KEY (codigoReparo) REFERENCES REPARO(codigo),
+    FOREIGN KEY (ruaEndereco, bairroEndereco, numeroEndereco)
+		REFERENCES ENDERECO(rua, bairro, numero)
 );
 
 CREATE TABLE EQUIPAMENTO(
 	id INTEGER,
-	preco_h DECIMAL(10,2),
-    status_disponibilidade VARCHAR(20),
+	precoH DECIMAL(10,2),
+    statusDisponibilidade VARCHAR(20),
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE EQUIP_COMPUTADOR(
-	id_equip INTEGER,
+	idEquip INTEGER,
 	login VARCHAR(20),
     senha VARCHAR(8),
     sistema VARCHAR(30),
-    PRIMARY KEY (id_equip),
-    FOREIGN KEY (id_equip) REFERENCES EQUIPAMENTO(id) ON DELETE CASCADE ON UPDATE CASCADE
+    PRIMARY KEY (idEquip),
+    FOREIGN KEY (idEquip) REFERENCES EQUIPAMENTO(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE EQUIP_CONSOLE(
-	id_equip INTEGER,
-    qtde_controle INTEGER,
-    PRIMARY KEY (id_equip),
-    FOREIGN KEY (id_equip) REFERENCES EQUIPAMENTO(id) ON DELETE CASCADE ON UPDATE CASCADE
+	idEquip INTEGER,
+    qtdeControle INTEGER,
+    PRIMARY KEY (idEquip),
+    FOREIGN KEY (idEquip) REFERENCES EQUIPAMENTO(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE JOGO(
 	id INTEGER,
     nome VARCHAR(100),
-    data_instalação DATE,
-    nome_produtora VARCHAR(100),
+    dataInstalação DATE,
+    nomeProdutora VARCHAR(100),
     PRIMARY KEY (id)
-);
-
-CREATE TABLE REPARO(
-	codigo INTEGER,
-    preco DECIMAL(10,2),
-    tipo_equipamento VARCHAR(20),
-    descricao VARCHAR(200),
-    PRIMARY KEY (codigo)
 );
 
 CREATE TABLE FORNECEDOR(
 	cnpj CHAR(14),
-    nome_empresa VARCHAR(100),
-    nome_fornecedor VARCHAR(100),
-    PRIMARY KEY (cnpj)
+    nomeEmpresa VARCHAR(100),
+    nomeFornecedor VARCHAR(100),
+    ruaEndereco VARCHAR(100),
+    bairroEndereco VARCHAR(100),
+    numeroEndereco INTEGER,
+    PRIMARY KEY (cnpj),
+    FOREIGN KEY (ruaEndereco, bairroEndereco, numeroEndereco)
+		REFERENCES ENDERECO (rua, bairro, numero) ON DELETE CASCADE
+);
+
+CREATE TABLE PEDIDO(
+	numero INTEGER,
+    valorTotal DECIMAL(10,2),
+    tempoTotalEquip VARCHAR(100),
+    equipUtilizado VARCHAR(100),
+    cpfCliente CHAR(11),
+    PRIMARY KEY (numero),
+    FOREIGN KEY (cpfCliente) REFERENCES CLIENTE (cpf)
+);
+
+CREATE TABLE NOTA_FISCAL(
+	numPedido INTEGER UNIQUE,
+    razaoSocial VARCHAR(100),
+    cnpj CHAR(14),
+    email VARCHAR(100),
+    PRIMARY KEY (numPedido),
+    FOREIGN KEY (numPedido) REFERENCES PEDIDO(numero) ON DELETE CASCADE
+);
+
+CREATE TABLE PRODUTO(
+	id INTEGER,
+    nome VARCHAR(100),
+    preco DECIMAL(10,2),
+    cpfCliente CHAR(11),
+    PRIMARY KEY (id),
+    FOREIGN KEY (cpfCliente) REFERENCES CLIENTE (cpf)
+);
+
+CREATE TABLE PRODUTO_PECASCOMPUTADOR(
+	idProduto INTEGER,
+    nome VARCHAR(100),
+    marca VARCHAR(100),
+    fabricante VARCHAR(100),
+    PRIMARY KEY (idProduto),
+    FOREIGN KEY (idProduto) REFERENCES PRODUTO (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE PRODUTO_ACESSORIOS(
+	idProduto INTEGER,
+    tipo VARCHAR(100),
+    PRIMARY KEY (idProduto),
+    FOREIGN KEY (idProduto) REFERENCES PRODUTO(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE FUNCIONARIO_ATENDE_CLIENTE(
+	cpfCliente CHAR(11),
+    cpfFuncionario CHAR(11),
+    PRIMARY KEY (cpfCliente, cpfFuncionario),
+    FOREIGN KEY (cpfCliente) REFERENCES CLIENTE(cpf),
+    FOREIGN KEY (cpfFuncionario) REFERENCES FUNCIONARIO(cpf)
+);
+
+CREATE TABLE FUNCIONARIO_ARRUMA_EQUIPAMENTO(
+	idEquip INTEGER,
+    cpfFuncionario CHAR(11),
+    PRIMARY KEY (idEquip, cpfFuncionario),
+    FOREIGN KEY (idEquip) REFERENCES EQUIPAMENTO(id),
+    FOREIGN KEY (cpfFuncionario) REFERENCES FUNCIONARIO(cpf)
+);
+
+CREATE TABLE CLIENTE_UTILIZA_EQUIPAMENTO(
+	idEquip INTEGER,
+    cpfCliente CHAR(11),
+    PRIMARY KEY (idEquip, cpfCliente),
+    FOREIGN KEY (idEquip) REFERENCES EQUIPAMENTO (id),
+    FOREIGN KEY (cpfCliente) REFERENCES CLIENTE(cpf)
+);
+
+CREATE TABLE EQUIPAMENTO_TEM_JOGO(
+	idEquip INTEGER,
+    idJogo INTEGER,
+    PRIMARY KEY (idEquip, idJogo),
+    FOREIGN KEY (idEquip) REFERENCES EQUIPAMENTO (id),
+    FOREIGN KEY (idJogo) REFERENCES JOGO(id)
+);
+
+CREATE TABLE FUNCIONARIO_GERENCIA_PEDIDO(
+	numeroPedido INTEGER,
+    cpfFuncionario CHAR(11),
+    PRIMARY KEY (numeroPedido, cpfFuncionario),
+    FOREIGN KEY (numeroPedido) REFERENCES PEDIDO(numero),
+    FOREIGN KEY (cpfFuncionario) REFERENCES FUNCIONARIO(cpf)
+);
+
+CREATE TABLE FORNECEDOR_FORNECE_PRODUTO(
+	cnpjFornecedor CHAR(14),
+    idProduto INTEGER,
+	PRIMARY KEY (cnpjFornecedor, idProduto),
+    FOREIGN KEY (cnpjFornecedor) REFERENCES FORNECEDOR(cnpj),
+    FOREIGN KEY (idProduto) REFERENCES PRODUTO(id)
 );
