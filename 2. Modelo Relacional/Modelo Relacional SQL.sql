@@ -44,7 +44,7 @@ CREATE TABLE CLIENTE(
     numeroEndereco INTEGER,
     PRIMARY KEY (cpf),
     FOREIGN KEY( ruaEndereco, bairroEndereco, numeroEndereco)
-		REFERENCES ENDERECO(rua, bairro, numero) ON DELETE CASCADE
+		REFERENCES ENDERECO(rua, bairro, numero)
 );
 
 CREATE TABLE REPARO(
@@ -113,7 +113,7 @@ CREATE TABLE FORNECEDOR(
     numeroEndereco INTEGER,
     PRIMARY KEY (cnpj),
     FOREIGN KEY (ruaEndereco, bairroEndereco, numeroEndereco)
-		REFERENCES ENDERECO (rua, bairro, numero) ON DELETE CASCADE
+		REFERENCES ENDERECO (rua, bairro, numero)
 );
 
 CREATE TABLE PEDIDO(
