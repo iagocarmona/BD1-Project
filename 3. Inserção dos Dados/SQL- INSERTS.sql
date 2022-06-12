@@ -143,13 +143,9 @@ CREATE TABLE ENDERECO(
     bairro VARCHAR(100),
     numero INTEGER,
     cidade VARCHAR(100),
-    cpfCliente VARCHAR(11),
     cpfFuncionario VARCHAR(11),
-    cnpjFornecedor VARCHAR(14),
-    PRIMARY KEY (cpfCliente, cpfFuncionario, cnpjFornecedor),
-	FOREIGN KEY (cpfCliente) REFERENCES CLIENTE(cpf) ON DELETE CASCADE,
-    FOREIGN KEY (cpfFuncionario) REFERENCES FUNCIONARIO(cpf) ON DELETE CASCADE,
-    FOREIGN KEY (cnpjFornecedor) REFERENCES FORNECEDOR(cnpj) ON DELETE CASCADE
+    PRIMARY KEY (cpfFuncionario),
+    FOREIGN KEY (cpfFuncionario) REFERENCES FUNCIONARIO(cpf) ON DELETE CASCADE
 );
 
 CREATE TABLE FUNCIONARIO_ATENDE_CLIENTE(
@@ -365,7 +361,17 @@ insert into PRODUTO_ACESSORIOS(idProduto, tipo) values
 (17, 'Mesa Digitalizadora'), (18, 'Hub USB'), (19, 'Base Refrigeradora'),
 (20, 'Ventoinha');
 
--- ------------------------ ENDERECO ------------------------------------
+insert into ENDERECO (estado, rua, bairro, numero, cidade, cpfFuncionario) values 
+('PR', 'Rua Ezídio Baladeli', 'Zona 7', 110, 'Cianorte', '57433870102'),
+('PR', 'Rua Monte Verde', 'Zona 7', 345, 'Cianorte','80280057850'),
+('PR', 'Rua Washington Luis', 'Zona 7', 152, 'Cianorte','19798439734'),
+('PR', 'Rua Francisco Tourinho', 'Zona 7', 145,'Cianorte', '17331434379'),
+('PR', 'Rua Jordão', 'Zona 7', 1477, 'Cianorte','87925400034'),
+('PR', 'Av América', 'Zona 2', 1482, 'Cianorte','56398398714'),
+('PR', 'Av América', 'Zona 3', 563, 'Cianorte','80532800175'),
+('PR', 'Av Marajó', 'Zona 7', 485, 'Cianorte','77279950104'),
+('PR', 'Rua Solimões', 'Zona 4', 320, 'Cianorte','17576646973'),
+('PR', 'Rua Japurá', 'Zona 6', 154,'Cianorte','70354031297');
 
 insert into FUNCIONARIO_ATENDE_CLIENTE(cpfCliente, cpfFuncionario) values
 ('29639120561', '57433870102'), ('40839973710', '80280057850'), ('88063886507', '19798439734'),
@@ -405,7 +411,6 @@ insert into FORNECEDOR_FORNECE_PRODUTO(cnpjFornecedor, idProduto) values
 insert into PEDIDO_TEM_EQUIPAMENTO(idEquip, pedidoNumero) values
 (1,1), (3,2), (4,3), (7,4), (8,5), (9,6),
 (12,7), (14,8), (18,9), (20,10);
-
 
 
 

@@ -2,13 +2,14 @@
 -- -------------------------------------------------------------------------
 -- LINK DO REPOSITÓRIO -> https://github.com/iagocarmona/BD1-Projeto
 -- -------------------------------------------------------------------------
-
+DROP TABLE IF EXISTS PEDIDO_TEM_EQUIPAMENTO;
 DROP TABLE IF EXISTS FORNECEDOR_FORNECE_PRODUTO;
 DROP TABLE IF EXISTS FUNCIONARIO_GERENCIA_PEDIDO;
 DROP TABLE IF EXISTS EQUIPAMENTO_TEM_JOGO;
 DROP TABLE IF EXISTS CLIENTE_UTILIZA_EQUIPAMENTO;
 DROP TABLE IF EXISTS FUNCIONARIO_ARRUMA_EQUIPAMENTO;
 DROP TABLE IF EXISTS FUNCIONARIO_ATENDE_CLIENTE;
+DROP TABLE IF EXISTS ENDERECO;
 DROP TABLE IF EXISTS PRODUTO_ACESSORIOS;
 DROP TABLE IF EXISTS PRODUTO_PECASCOMPUTADOR;
 DROP TABLE IF EXISTS PRODUTO;
@@ -22,29 +23,14 @@ DROP TABLE IF EXISTS EQUIPAMENTO;
 DROP TABLE IF EXISTS FUNCIONARIO;
 DROP TABLE IF EXISTS REPARO;
 DROP TABLE IF EXISTS CLIENTE;
-DROP TABLE IF EXISTS ENDERECO;
-
-CREATE TABLE ENDERECO(
-	estado CHAR(2),
-    rua VARCHAR(100),
-    bairro VARCHAR(100),
-    numero INTEGER,
-    cidade VARCHAR(100),
-    PRIMARY KEY (rua, bairro, numero)
-);
 
 CREATE TABLE CLIENTE(
 	cpf CHAR(11),
     rg CHAR(9),
-    telefone CHAR(13),
+    telefone CHAR(8),
     email VARCHAR(200),
     nome VARCHAR(100),
-    ruaEndereco VARCHAR(100),
-	bairroEndereco VARCHAR(100),
-    numeroEndereco INTEGER,
-    PRIMARY KEY (cpf),
-    FOREIGN KEY( ruaEndereco, bairroEndereco, numeroEndereco)
-		REFERENCES ENDERECO(rua, bairro, numero)
+    PRIMARY KEY (cpf)
 );
 
 CREATE TABLE REPARO(
@@ -61,16 +47,10 @@ CREATE TABLE FUNCIONARIO(
 	cpf CHAR(11),
     rg CHAR (9),
     salario DECIMAL(10,2),
-	cargo VARCHAR(20),
     nome VARCHAR(100),
     codigoReparo INTEGER,
-    ruaEndereco VARCHAR(100),
-    bairroEndereco VARCHAR(100),
-    numeroEndereco INTEGER,
     PRIMARY KEY(cpf),
-    FOREIGN KEY (codigoReparo) REFERENCES REPARO(codigo),
-    FOREIGN KEY (ruaEndereco, bairroEndereco, numeroEndereco)
-		REFERENCES ENDERECO(rua, bairro, numero)
+    FOREIGN KEY (codigoReparo) REFERENCES REPARO(codigo)
 );
 
 CREATE TABLE EQUIPAMENTO(
@@ -92,6 +72,7 @@ CREATE TABLE EQUIP_COMPUTADOR(
 CREATE TABLE EQUIP_CONSOLE(
 	idEquip INTEGER,
     qtdeControle INTEGER,
+    tipo VARCHAR(100),
     PRIMARY KEY (idEquip),
     FOREIGN KEY (idEquip) REFERENCES EQUIPAMENTO(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -99,7 +80,7 @@ CREATE TABLE EQUIP_CONSOLE(
 CREATE TABLE JOGO(
 	id INTEGER,
     nome VARCHAR(100),
-    dataInstalação DATE,
+    dataInstalacao DATE,
     nomeProdutora VARCHAR(100),
     PRIMARY KEY (id)
 );
@@ -108,19 +89,13 @@ CREATE TABLE FORNECEDOR(
 	cnpj CHAR(14),
     nomeEmpresa VARCHAR(100),
     nomeFornecedor VARCHAR(100),
-    ruaEndereco VARCHAR(100),
-    bairroEndereco VARCHAR(100),
-    numeroEndereco INTEGER,
-    PRIMARY KEY (cnpj),
-    FOREIGN KEY (ruaEndereco, bairroEndereco, numeroEndereco)
-		REFERENCES ENDERECO (rua, bairro, numero)
+    PRIMARY KEY (cnpj)
 );
 
 CREATE TABLE PEDIDO(
 	numero INTEGER,
     valorTotal DECIMAL(10,2),
     tempoTotalEquip VARCHAR(100),
-    equipUtilizado VARCHAR(100),
     cpfCliente CHAR(11),
     PRIMARY KEY (numero),
     FOREIGN KEY (cpfCliente) REFERENCES CLIENTE (cpf)
@@ -131,6 +106,7 @@ CREATE TABLE NOTA_FISCAL(
     razaoSocial VARCHAR(100),
     cnpj CHAR(14),
     email VARCHAR(100),
+    totalPagar DECIMAL(10,2),
     PRIMARY KEY (numPedido),
     FOREIGN KEY (numPedido) REFERENCES PEDIDO(numero) ON DELETE CASCADE
 );
@@ -146,7 +122,7 @@ CREATE TABLE PRODUTO(
 
 CREATE TABLE PRODUTO_PECASCOMPUTADOR(
 	idProduto INTEGER,
-    nome VARCHAR(100),
+    modelo VARCHAR(100),
     marca VARCHAR(100),
     fabricante VARCHAR(100),
     PRIMARY KEY (idProduto),
@@ -158,6 +134,17 @@ CREATE TABLE PRODUTO_ACESSORIOS(
     tipo VARCHAR(100),
     PRIMARY KEY (idProduto),
     FOREIGN KEY (idProduto) REFERENCES PRODUTO(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE ENDERECO(
+	estado CHAR(2),
+    rua VARCHAR(100),
+    bairro VARCHAR(100),
+    numero INTEGER,
+    cidade VARCHAR(100),
+    cpfFuncionario VARCHAR(11),
+    PRIMARY KEY (cpfFuncionario),
+    FOREIGN KEY (cpfFuncionario) REFERENCES FUNCIONARIO(cpf) ON DELETE CASCADE
 );
 
 CREATE TABLE FUNCIONARIO_ATENDE_CLIENTE(
@@ -206,4 +193,12 @@ CREATE TABLE FORNECEDOR_FORNECE_PRODUTO(
 	PRIMARY KEY (cnpjFornecedor, idProduto),
     FOREIGN KEY (cnpjFornecedor) REFERENCES FORNECEDOR(cnpj),
     FOREIGN KEY (idProduto) REFERENCES PRODUTO(id)
+);
+
+CREATE TABLE PEDIDO_TEM_EQUIPAMENTO(
+	idEquip INTEGER,
+    pedidoNumero INTEGER,
+    PRIMARY KEY (idEquip, pedidoNumero),
+    FOREIGN KEY (idEquip) REFERENCES EQUIPAMENTO (id),
+    FOREIGN KEY (pedidoNumero) REFERENCES PEDIDO(numero)
 );
